@@ -9,5 +9,21 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "dependencies": {
+    "dotenv": "^18.0.10",
+    "pg": "^8.23.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ebenhom/lily-the-story.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ebenhom/lily-the-story/issues"
+  },
+  "homepage": "https://github.com/ebenhom/lily-the-story#readme"
 }
