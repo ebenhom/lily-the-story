@@ -1,0 +1,13 @@
+{
+  "name": "lily-the-story",
+  "version": "1.0.0",
+  "description": "Lily the Story - Website đọc truyện tiểu thuyết và truyện tranh",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,13 @@
+[
+  {
+    "id": "admin-1",
+    "email": "phanhnguyen342@gmail.com",
+    "password": "phanhnguyen666",
+    "name": "Phanh Nguyen",
+    "role": "admin",
+    "blocked": false,
+    "favorites": [],
+    "history": [],
+    "createdAt": "2026-01-01"
+  }
+]

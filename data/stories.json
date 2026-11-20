@@ -1,0 +1,102 @@
+[
+  {
+    "id": "1",
+    "title": "Hoa Ly Trắng",
+    "author": "Phanh Nguyen",
+    "type": "novel",
+    "genres": [
+      "Ngôn tình (BG)",
+      "Hiện đại",
+      "Ngọt",
+      "HE"
+    ],
+    "cover": "",
+    "description": "Câu chuyện về một cô gái tên Lily và hành trình tìm kiếm tình yêu đích thực giữa những cánh hoa ly trắng. Tiểu thuyết lãng mạn đầy cảm xúc.",
+    "status": "Đang ra",
+    "views": 1250,
+    "rating": 4.8,
+    "createdAt": "2026-01-15",
+    "chapters": [
+      {
+        "id": "1-1",
+        "title": "Chương 1: Gặp gỡ dưới mưa",
+        "order": 1,
+        "content": "Trời đang mưa nặng hạt khi Lily chạy vội vào quán cà phê nhỏ ở góc phố. Tóc ướt sũng, cô ngồi xuống ghế gần cửa sổ và gọi một ly latte nóng.\n\nChàng trai ngồi đối diện nhìn cô với nụ cười nhẹ nhàng. \"Cậu ổn chứ?\" anh hỏi.\n\nLily gật đầu, cảm thấy hơi xấu hổ. Đó là lần đầu tiên họ gặp nhau - dưới cơn mưa tháng Ba, và cũng là khởi đầu của một câu chuyện dài..."
+      },
+      {
+        "id": "1-2",
+        "title": "Chương 2: Hoa ly đầu tiên",
+        "order": 2,
+        "content": "Sáng hôm sau, Lily nhận được một bó hoa ly trắng để trước cửa nhà. Không có thẻ tên, chỉ có một dòng chữ viết tay: \"Cho cô gái dưới mưa.\"\n\nCô mỉm cười, mang hoa vào nhà và cắm vào bình. Hương thơm dịu dàng lan tỏa khắp căn phòng nhỏ.\n\nTừ đó, mỗi tuần cô lại nhận được hoa, và dần dần, họ bắt đầu nói chuyện nhiều hơn..."
+      },
+      {
+        "id": "1-3",
+        "title": "Chương 3: Bí mật",
+        "order": 3,
+        "content": "Lily phát hiện ra rằng chàng trai tên Minh chính là chủ sở hữu của tiệm hoa đối diện quán cà phê. Anh đã theo dõi cô từ xa, sợ làm phiền nếu tiến đến quá nhanh.\n\n\"Tôi chỉ muốn thấy cậu cười,\" Minh thừa nhận.\n\nCô cảm động, nhưng cũng có chút lo lắng. Liệu tình cảm này có thật sự chân thành?"
+      }
+    ],
+    "hidden": false,
+    "commentsDisabled": false
+  },
+  {
+    "id": "2",
+    "title": "Lily of the Valley",
+    "author": "Admin",
+    "type": "comic",
+    "genres": [
+      "Huyền huyễn",
+      "Tiên hiệp",
+      "Nữ cường"
+    ],
+    "cover": "",
+    "description": "Truyện tranh fantasy về thế giới nơi hoa ly thung lũng có sức mạnh ma thuật. Nữ chính Lily phải bảo vệ khu rừng thiêng khỏi thế lực bóng tối.",
+    "status": "Hoàn thành",
+    "views": 890,
+    "rating": 4.5,
+    "createdAt": "2026-02-01",
+    "chapters": [
+      {
+        "id": "2-1",
+        "title": "Chương 1: Thung lũng",
+        "order": 1,
+        "pages": []
+      },
+      {
+        "id": "2-2",
+        "title": "Chương 2: Thức tỉnh",
+        "order": 2,
+        "pages": []
+      }
+    ],
+    "hidden": false,
+    "commentsDisabled": false
+  },
+  {
+    "id": "3",
+    "title": "Mùa Hoa Nở",
+    "author": "Lan Anh",
+    "type": "novel",
+    "genres": [
+      "Thanh xuân vườn trường",
+      "Học đường",
+      "Chữa lành"
+    ],
+    "cover": "",
+    "description": "Câu chuyện về tuổi trẻ, tình bạn và những mùa hoa nở trong khu vườn nhỏ. Đầy ắp cảm xúc và kỷ niệm.",
+    "status": "Đang ra",
+    "views": 560,
+    "rating": 4.2,
+    "createdAt": "2026-03-10",
+    "chapters": [
+      {
+        "id": "3-1",
+        "title": "Chương 1: Khu vườn cũ",
+        "order": 1,
+        "content": "Mỗi khi mùa xuân đến, khu vườn sau nhà lại tràn ngập hoa. Lily nhỏ thích ngồi dưới gốc cây và đọc sách. Năm nay, cô 18 tuổi, sắp rời nhà để lên thành phố học đại học.\n\n\"Con sẽ nhớ khu vườn này lắm,\" cô thì thầm với những bông hoa."
+      }
+    ],
+    "hidden": false,
+    "commentsDisabled": false
+  }
+]
