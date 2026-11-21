@@ -17,14 +17,90 @@ pool.query('SELECT NOW()')
   .then(() => console.log('✅ Đã kết nối Neon PostgreSQL'))
   .catch(err => console.error('❌ Lỗi kết nối Neon:', err.message));
 
+// ===================== TỰ ĐỒNG BỘ SCHEMA =====================
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id text PRIMARY KEY,
+      email text UNIQUE NOT NULL,
+      password text NOT NULL,
+      name text,
+      role text DEFAULT 'user',
+      blocked boolean DEFAULT false,
+      ban_comment boolean DEFAULT false,
+      favorites jsonb DEFAULT '[]',
+      history jsonb DEFAULT '[]',
+      created_at text
+    );
+    CREATE TABLE IF NOT EXISTS stories (
+      id text PRIMARY KEY,
+      title text NOT NULL,
+      author text DEFAULT 'Ẩn danh',
+      type text NOT NULL,
+      genres jsonb DEFAULT '[]',
+      cover text DEFAULT '',
+      description text DEFAULT '',
+      status text DEFAULT 'Đang ra',
+      views integer DEFAULT 0,
+      rating numeric DEFAULT 0,
+      created_at text,
+      chapters jsonb DEFAULT '[]',
+      hidden boolean DEFAULT false,
+      comments_disabled boolean DEFAULT false
+    );
+    CREATE TABLE IF NOT EXISTS comments (
+      id text PRIMARY KEY,
+      story_id text,
+      user_id text,
+      user_name text,
+      content text,
+      chapter_id text,
+      created_at text,
+      hidden boolean DEFAULT false,
+      likes jsonb DEFAULT '[]'
+    );
+    CREATE TABLE IF NOT EXISTS settings (
+      key text PRIMARY KEY,
+      value jsonb
+    );
+  `);
+
+  // Bổ sung cột còn thiếu nếu bảng đã tồn tại từ trước
+  await pool.query(`
+    ALTER TABLE stories
+      ADD COLUMN IF NOT EXISTS genres jsonb DEFAULT '[]',
+      ADD COLUMN IF NOT EXISTS cover text DEFAULT '',
+      ADD COLUMN IF NOT EXISTS description text DEFAULT '',
+      ADD COLUMN IF NOT EXISTS status text DEFAULT 'Đang ra',
+      ADD COLUMN IF NOT EXISTS views integer DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS rating numeric DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS chapters jsonb DEFAULT '[]',
+      ADD COLUMN IF NOT EXISTS hidden boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS comments_disabled boolean DEFAULT false;
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS blocked boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS ban_comment boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS favorites jsonb DEFAULT '[]',
+      ADD COLUMN IF NOT EXISTS history jsonb DEFAULT '[]';
+    ALTER TABLE comments
+      ADD COLUMN IF NOT EXISTS hidden boolean DEFAULT false,
+      ADD COLUMN IF NOT EXISTS likes jsonb DEFAULT '[]',
+      ADD COLUMN IF NOT EXISTS chapter_id text;
+  `);
+}
+
 // ===================== CONFIG =====================
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, 'public');
 const UPLOADS = path.join(PUBLIC, 'uploads');
+const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-secret-doi-ngay';
+const MASTER_PASSWORD = process.env.MASTER_PASSWORD || 'phanhnguyen666';
+
+if (!process.env.SESSION_SECRET) {
+  console.warn('⚠️ Chưa đặt biến môi trường SESSION_SECRET, hãy thêm trên Render');
+}
 
 if (!fs.existsSync(UPLOADS)) fs.mkdirSync(UPLOADS, { recursive: true });
-
-const sessions = new Map();
 
 const GENRES = [
   'Ngôn tình (BG)', 'Đam mỹ (BL)', 'Bách hợp (GL)', '1x1', 'NP', 'Vô CP',
@@ -46,10 +122,35 @@ function uuid() {
   return crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
 }
 
+// Token có chữ ký: không cần lưu trên server, restart vẫn dùng được
+function signToken(payload) {
+  const data = Buffer.from(JSON.stringify({
+    ...payload,
+    exp: Date.now() + 30 * 24 * 3600 * 1000 // 30 ngày
+  })).toString('base64url');
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
+  return data + '.' + sig;
+}
+
+function verifyToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const [data, sig] = parts;
+  const expected = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  try {
+    const p = JSON.parse(Buffer.from(data, 'base64url').toString());
+    return p.exp > Date.now() ? p : null;
+  } catch {
+    return null;
+  }
+}
+
 function getAuth(req) {
-  const token = req.headers['x-auth-token'];
-  if (!token) return null;
-  return sessions.get(token) || null;
+  return verifyToken(req.headers['x-auth-token']);
 }
 
 function sendJSON(res, status, data) {
@@ -176,8 +277,7 @@ const server = http.createServer(async (req, res) => {
            VALUES ($1,$2,$3,$4,'user',false,'[]','[]',$5)`,
           [id, body.email, body.password, body.name, new Date().toISOString().slice(0, 10)]
         );
-        const token = uuid();
-        sessions.set(token, { id, email: body.email, name: body.name, role: 'user' });
+        const token = signToken({ id, email: body.email, name: body.name, role: 'user' });
         return sendJSON(res, 200, {
           token,
           user: { id, email: body.email, name: body.name, role: 'user' }
@@ -194,8 +294,7 @@ const server = http.createServer(async (req, res) => {
         if (r.rows.length === 0) return sendJSON(res, 401, { error: 'Email hoặc mật khẩu không đúng' });
         const user = r.rows[0];
         if (user.blocked) return sendJSON(res, 403, { error: 'Tài khoản đã bị khóa' });
-        const token = uuid();
-        sessions.set(token, { id: user.id, email: user.email, name: user.name, role: user.role });
+        const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
         return sendJSON(res, 200, {
           token,
           user: { id: user.id, email: user.email, name: user.name, role: user.role }
@@ -203,8 +302,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (pathname === '/api/logout' && method === 'POST') {
-        const token = req.headers['x-auth-token'];
-        if (token) sessions.delete(token);
+        // Token không lưu trên server nên chỉ cần client xóa token
         return sendJSON(res, 200, { ok: true });
       }
 
@@ -581,7 +679,7 @@ const server = http.createServer(async (req, res) => {
         if (!(await requireAdmin(req, res))) return;
         const body = await parseBody(req);
         if (!body.email || !body.password) return sendJSON(res, 400, { error: 'Thiếu email hoặc mật khẩu' });
-        if (body.masterPassword !== 'phanhnguyen666') {
+        if (body.masterPassword !== MASTER_PASSWORD) {
           return sendJSON(res, 403, { error: 'Mật khẩu xác nhận quyền admin không đúng' });
         }
         const exists = await pool.query('SELECT * FROM users WHERE email = $1', [body.email]);
@@ -674,7 +772,12 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log('🌸 Lily the Story đang chạy tại http://localhost:' + PORT);
-  console.log('   Admin: phanhnguyen342@gmail.com / phanhnguyen666');
-});
+// Đồng bộ schema xong rồi mới nhận request
+ensureSchema()
+  .then(() => console.log('✅ Schema sẵn sàng'))
+  .catch(err => console.error('❌ Lỗi đồng bộ schema:', err.message))
+  .finally(() => {
+    server.listen(PORT, () => {
+      console.log('🌸 Lily the Story đang chạy tại http://localhost:' + PORT);
+    });
+  });
